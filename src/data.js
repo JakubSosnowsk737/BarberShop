@@ -61,7 +61,7 @@ function booking({ id, clientId, barberId, serviceId, startsAt, status, source, 
 
 export const initialData = {
   salon: {
-    name: "HairBook Barber Studio",
+    name: "Praga Barbers",
     city: "Warszawa",
     address: "ul. Brzeska 18",
     phone: "+48 511 200 300",

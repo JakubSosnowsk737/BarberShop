@@ -321,7 +321,7 @@ function restoreFocus(snapshot) {
 
 function render() {
   if (state.loading) {
-    app.innerHTML = `<div class="loading-screen">Ładowanie HairBook...</div>`;
+    app.innerHTML = `<div class="loading-screen">Ładowanie…</div>`;
     return;
   }
 
@@ -405,30 +405,61 @@ function renderModal() {
   `;
 }
 
+const BRAND_NAME = "PRAGA BARBERS";
+const BRAND_TAGLINE = "Barber Studio · Warszawa";
+
+let brandLogoSeq = 0;
+
+// Emblemat marki — słup barberski (czerwono-niebieskie pasy, mosiężne nakładki).
+function brandLogo(className = "brand-logo") {
+  const id = `bp-${(brandLogoSeq += 1)}`;
+  return `
+    <svg class="${className}" viewBox="0 0 48 48" role="img" aria-label="Logo ${BRAND_NAME}">
+      <defs>
+        <clipPath id="${id}"><rect x="18" y="9" width="12" height="30" rx="6"/></clipPath>
+      </defs>
+      <rect x="15.5" y="3.5" width="17" height="6" rx="3" fill="#c89b4a"/>
+      <rect x="15.5" y="38.5" width="17" height="6" rx="3" fill="#c89b4a"/>
+      <rect x="18" y="9" width="12" height="30" rx="6" fill="#ffffff"/>
+      <g clip-path="url(#${id})">
+        <g transform="rotate(28 24 24)">
+          <rect x="-8" y="-11" width="5" height="70" fill="#d62828"/>
+          <rect x="2" y="-11" width="5" height="70" fill="#1d4ed8"/>
+          <rect x="12" y="-11" width="5" height="70" fill="#d62828"/>
+          <rect x="22" y="-11" width="5" height="70" fill="#1d4ed8"/>
+          <rect x="32" y="-11" width="5" height="70" fill="#d62828"/>
+          <rect x="42" y="-11" width="5" height="70" fill="#1d4ed8"/>
+        </g>
+      </g>
+      <rect x="18" y="9" width="12" height="30" rx="6" fill="none" stroke="rgba(15,23,23,0.18)" stroke-width="1.5"/>
+    </svg>
+  `;
+}
+
 function renderAuth() {
   const isLogin = state.authMode === "login";
 
   return `
     <main class="auth-screen">
       <section class="auth-copy">
-        <div class="brand">
-          <div class="brand-mark">HB</div>
+        <div class="brand brand-lg">
+          <span class="brand-mark">${brandLogo()}</span>
           <div>
-            <strong>HairBook</strong>
-            <span>Barber shop manager</span>
+            <strong>${BRAND_NAME}</strong>
+            <span>${BRAND_TAGLINE}</span>
           </div>
         </div>
-        <h1>Logowanie do lokalnej aplikacji salonu.</h1>
-        <p>Teraz dane trafiają do PostgreSQL, a dostęp do panelu zależy od konta użytkownika i roli.</p>
+        <p class="auth-tagline">Rezerwacje, grafik zespołu i kartoteka klientów w jednym miejscu.</p>
         <div class="demo-credentials">
-          <strong>Konta demo (hasło: 1234)</strong>
-          <span>Administrator: j.sosnowski@hairapp.com</span>
-          <span>Fryzjer: b.sochacki@hairapp.com</span>
-          <span>Fryzjer: b.walczyk@hairapp.com</span>
-          <span>Klient: n.szyszka@hairapp.com</span>
+          <strong>Konta demo · hasło 1234</strong>
+          <span><em>Administrator</em><code>j.sosnowski@hairapp.com</code></span>
+          <span><em>Fryzjer</em><code>b.sochacki@hairapp.com</code></span>
+          <span><em>Fryzjer</em><code>b.walczyk@hairapp.com</code></span>
+          <span><em>Klient</em><code>n.szyszka@hairapp.com</code></span>
         </div>
       </section>
       <section class="auth-panel">
+        <h2 class="auth-title">${isLogin ? "Zaloguj się" : "Załóż konto klienta"}</h2>
         <div class="auth-tabs" role="group" aria-label="Tryb autoryzacji">
           <button class="${isLogin ? "active" : ""}" data-auth-mode="login">Logowanie</button>
           <button class="${!isLogin ? "active" : ""}" data-auth-mode="register">Rejestracja</button>
@@ -452,10 +483,10 @@ function renderSidebar() {
   return `
     <aside class="sidebar">
       <div class="brand">
-        <div class="brand-mark">HB</div>
+        <span class="brand-mark">${brandLogo()}</span>
         <div>
-          <strong>HairBook</strong>
-          <span>Local salon OS</span>
+          <strong>${BRAND_NAME}</strong>
+          <span>${BRAND_TAGLINE}</span>
         </div>
       </div>
       <nav class="nav-list" aria-label="Główna nawigacja">

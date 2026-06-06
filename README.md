@@ -1,7 +1,8 @@
-# HairBook — system zarządzania salonem barberskim
+# Praga Barbers — system zarządzania salonem barberskim
 
 Lokalna aplikacja webowa do prowadzenia salonu barberskiego: rezerwacje online i z recepcji,
 kalendarz pracy, kartoteka klientów (CRM), zespół, usługi, urlopy pracownicze i powiadomienia.
+Demo działa pod marką **Praga Barbers** (Barber Studio, Warszawa).
 Zbudowana na podstawie dokumentów `E-Barber-System.pdf` oraz `HairBook_BiznesPlan_v1.0.docx`
 (pełna dokumentacja koncepcyjna w katalogu [`docs/`](docs/)).
 
