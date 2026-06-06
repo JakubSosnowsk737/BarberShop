@@ -421,10 +421,11 @@ function renderAuth() {
         <h1>Logowanie do lokalnej aplikacji salonu.</h1>
         <p>Teraz dane trafiają do PostgreSQL, a dostęp do panelu zależy od konta użytkownika i roli.</p>
         <div class="demo-credentials">
-          <strong>Konta demo</strong>
-          <span>Admin: marta@hairbook.local / hairbook123</span>
-          <span>Fryzjer: oskar@hairbook.local / hairbook123</span>
-          <span>Klient: adam@example.com / hairbook123</span>
+          <strong>Konta demo (hasło: 1234)</strong>
+          <span>Administrator: j.sosnowski@hairapp.com</span>
+          <span>Fryzjer: b.sochacki@hairapp.com</span>
+          <span>Fryzjer: b.walczyk@hairapp.com</span>
+          <span>Klient: n.szyszka@hairapp.com</span>
         </div>
       </section>
       <section class="auth-panel">
@@ -436,7 +437,7 @@ function renderAuth() {
           ${!isLogin ? `<label><span>Imię i nazwisko</span><input name="name" autocomplete="name" required minlength="2"></label>` : ""}
           <label><span>E-mail</span><input name="email" type="email" autocomplete="email" required></label>
           ${!isLogin ? `<label><span>Telefon</span><input name="phone" autocomplete="tel" required></label>` : ""}
-          <label><span>Hasło</span><input name="password" type="password" autocomplete="${isLogin ? "current-password" : "new-password"}" required minlength="8"></label>
+          <label><span>Hasło</span><input name="password" type="password" autocomplete="${isLogin ? "current-password" : "new-password"}" required ${isLogin ? "" : 'minlength="8"'}></label>
           <button class="primary-button wide" type="submit">${isLogin ? "Zaloguj" : "Utwórz konto klienta"}</button>
         </form>
       </section>

@@ -9,7 +9,7 @@ import {
 } from "./auth.mjs";
 import { initialData } from "../src/data.js";
 
-const DEMO_PASSWORD = process.env.DEMO_PASSWORD || "hairbook123";
+const DEMO_PASSWORD = process.env.DEMO_PASSWORD || "1234";
 const ALLOWED_BOOKING_STATUSES = new Set(["confirmed", "completed", "cancelled"]);
 const ALLOWED_SLOT_STEPS = new Set([15, 30, 45, 60]);
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
@@ -267,7 +267,7 @@ export async function seedDatabase(pool) {
         `,
         [
           person.id,
-          person.id === "barber-1" ? "barber-1" : null,
+          person.userId ?? null,
           person.name,
           person.title,
           person.specialty,
@@ -287,10 +287,10 @@ export async function seedDatabase(pool) {
         `,
         [
           record.id,
-          record.id === "client-1" ? "client-1" : null,
+          record.userId ?? null,
           record.name,
           record.phone,
-          normalizeEmail(record.email),
+          record.email ? normalizeEmail(record.email) : null,
           record.notes,
           JSON.stringify(record.tags),
           record.lastVisit || null,

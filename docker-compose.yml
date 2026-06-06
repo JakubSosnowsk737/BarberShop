@@ -21,7 +21,7 @@ services:
     build: .
     environment:
       DATABASE_URL: postgres://hairbook:hairbook@db:5432/hairbook
-      DEMO_PASSWORD: hairbook123
+      DEMO_PASSWORD: "1234"
       COOKIE_SECURE: "false"
       PORT: 5173
       HOST: 0.0.0.0

@@ -1,12 +1,71 @@
-import { normalizeDateInput } from "./core.js";
+import { addMinutes, normalizeDateInput } from "./core.js";
+
+// --- Pomocnicze: terminy wizyt liczone względem dnia uruchomienia seeda, ---
+// --- aby demo zawsze pokazywało nadchodzące i niedawne wizyty.            ---
+function pad2(value) {
+  return String(value).padStart(2, "0");
+}
+
+function ymd(date) {
+  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+}
+
+// Najbliższe przyszłe wystąpienie dnia tygodnia (1 = pon … 6 = sob, 0 = nd).
+function nextWeekday(targetDow, time) {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  let add = (targetDow - date.getDay() + 7) % 7;
+  if (add === 0) add = 7;
+  date.setDate(date.getDate() + add);
+  return normalizeDateInput(ymd(date), time);
+}
+
+// Najbliższe minione wystąpienie dnia tygodnia.
+function prevWeekday(targetDow, time) {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  let sub = (date.getDay() - targetDow + 7) % 7;
+  if (sub === 0) sub = 7;
+  date.setDate(date.getDate() - sub);
+  return normalizeDateInput(ymd(date), time);
+}
+
+function daysAgo(days, time) {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  date.setDate(date.getDate() - days);
+  return normalizeDateInput(ymd(date), time);
+}
+
+const SERVICE_DURATION = {
+  "service-cut": 45,
+  "service-fade": 60,
+  "service-beard": 30,
+  "service-combo": 75,
+};
+
+function booking({ id, clientId, barberId, serviceId, startsAt, status, source, notes, createdAt }) {
+  return {
+    id,
+    clientId,
+    barberId,
+    serviceId,
+    startsAt,
+    endsAt: addMinutes(startsAt, SERVICE_DURATION[serviceId]),
+    status,
+    source,
+    notes,
+    createdAt,
+  };
+}
 
 export const initialData = {
   salon: {
     name: "HairBook Barber Studio",
     city: "Warszawa",
     address: "ul. Brzeska 18",
-    phone: "+48 501 204 300",
-    email: "kontakt@hairbook.local",
+    phone: "+48 511 200 300",
+    email: "kontakt@hairapp.com",
     plan: "Pro",
     rating: 4.8,
     reviewCount: 184,
@@ -24,26 +83,33 @@ export const initialData = {
     {
       id: "admin-1",
       role: "admin",
-      name: "Marta Zalewska",
-      email: "marta@hairbook.local",
+      name: "Jakub Sosnowski",
+      email: "j.sosnowski@hairapp.com",
     },
     {
       id: "barber-1",
       role: "barber",
-      name: "Oskar Wrona",
-      email: "oskar@hairbook.local",
+      name: "Bartosz Sochacki",
+      email: "b.sochacki@hairapp.com",
+    },
+    {
+      id: "barber-2",
+      role: "barber",
+      name: "Bartosz Walczyk",
+      email: "b.walczyk@hairapp.com",
     },
     {
       id: "client-1",
       role: "client",
-      name: "Adam Nowak",
-      email: "adam@example.com",
+      name: "Norbert Szyszka",
+      email: "n.szyszka@hairapp.com",
     },
   ],
   staff: [
     {
       id: "barber-1",
-      name: "Oskar Wrona",
+      userId: "barber-1",
+      name: "Bartosz Sochacki",
       title: "Senior barber",
       specialty: "Skin fade i klasyczne cięcia",
       active: true,
@@ -52,21 +118,13 @@ export const initialData = {
     },
     {
       id: "barber-2",
-      name: "Igor Maj",
+      userId: "barber-2",
+      name: "Bartosz Walczyk",
       title: "Barber",
-      specialty: "Broda, kontur, styling",
+      specialty: "Broda, kontur i koloryzacja",
       active: true,
-      workDays: [2, 3, 4, 5, 6],
+      workDays: [1, 2, 3, 4, 5, 6],
       color: "#b45309",
-    },
-    {
-      id: "barber-3",
-      name: "Tymon Kruk",
-      title: "Junior barber",
-      specialty: "Strzyżenie podstawowe",
-      active: true,
-      workDays: [1, 3, 5, 6],
-      color: "#2563eb",
     },
   ],
   services: [
@@ -110,110 +168,106 @@ export const initialData = {
   clients: [
     {
       id: "client-1",
-      name: "Adam Nowak",
-      phone: "501 100 200",
-      email: "adam@example.com",
-      notes: "Preferuje fade i matową pastę.",
+      userId: "client-1",
+      name: "Norbert Szyszka",
+      phone: "511 200 300",
+      email: "n.szyszka@hairapp.com",
+      notes: "Preferuje skin fade i matowe wykończenie.",
       tags: ["stały klient"],
-      lastVisit: normalizeDateInput("2026-05-03", "12:00"),
+      lastVisit: prevWeekday(2, "12:00"),
     },
     {
       id: "client-2",
       name: "Marek Kowalski",
       phone: "502 300 400",
-      email: "marek@example.com",
+      email: "marek.kowalski@example.com",
       notes: "Wrażliwa skóra po goleniu.",
       tags: ["broda"],
-      lastVisit: normalizeDateInput("2026-05-10", "16:00"),
+      lastVisit: prevWeekday(3, "16:00"),
     },
     {
       id: "client-3",
       name: "Filip Baran",
       phone: "503 200 100",
-      email: "filip@example.com",
+      email: "filip.baran@example.com",
       notes: "Przychodzi co 3 tygodnie.",
       tags: ["online"],
-      lastVisit: normalizeDateInput("2026-04-26", "10:00"),
+      lastVisit: daysAgo(20, "10:00"),
     },
     {
       id: "client-4",
       name: "Kamil Lis",
       phone: "504 440 550",
-      email: "kamil@example.com",
-      notes: "Lubi poranne terminy.",
+      email: "",
+      notes: "Gość bez konta, zapisany osobiście w salonie.",
       tags: ["nowy"],
       lastVisit: "",
     },
   ],
   bookings: [
-    {
+    booking({
       id: "booking-1001",
       clientId: "client-1",
       barberId: "barber-1",
       serviceId: "service-fade",
-      startsAt: normalizeDateInput("2026-05-18", "09:00"),
-      endsAt: normalizeDateInput("2026-05-18", "10:00"),
+      startsAt: nextWeekday(2, "10:00"),
       status: "confirmed",
       source: "online",
       notes: "Klient prosi o ciche powiadomienie SMS.",
-      createdAt: normalizeDateInput("2026-05-15", "11:20"),
-    },
-    {
+      createdAt: daysAgo(2, "11:20"),
+    }),
+    booking({
       id: "booking-1002",
       clientId: "client-2",
       barberId: "barber-2",
       serviceId: "service-combo",
-      startsAt: normalizeDateInput("2026-05-18", "10:30"),
-      endsAt: normalizeDateInput("2026-05-18", "11:45"),
+      startsAt: nextWeekday(3, "12:00"),
       status: "confirmed",
       source: "frontdesk",
       notes: "",
-      createdAt: normalizeDateInput("2026-05-16", "15:00"),
-    },
-    {
+      createdAt: daysAgo(1, "15:00"),
+    }),
+    booking({
       id: "booking-1003",
       clientId: "client-3",
       barberId: "barber-1",
       serviceId: "service-cut",
-      startsAt: normalizeDateInput("2026-05-18", "13:00"),
-      endsAt: normalizeDateInput("2026-05-18", "13:45"),
+      startsAt: nextWeekday(4, "13:00"),
       status: "confirmed",
       source: "online",
       notes: "Bez mycia.",
-      createdAt: normalizeDateInput("2026-05-16", "17:00"),
-    },
-    {
+      createdAt: daysAgo(1, "17:00"),
+    }),
+    booking({
       id: "booking-1004",
       clientId: "client-1",
       barberId: "barber-1",
       serviceId: "service-combo",
-      startsAt: normalizeDateInput("2026-05-03", "12:00"),
-      endsAt: normalizeDateInput("2026-05-03", "13:15"),
+      startsAt: prevWeekday(2, "12:00"),
       status: "completed",
       source: "frontdesk",
-      notes: "Udana wizyta, zaproponowac nastepny termin.",
-      createdAt: normalizeDateInput("2026-04-28", "09:10"),
-    },
-    {
+      notes: "Udana wizyta, zaproponować kolejny termin.",
+      createdAt: daysAgo(9, "09:10"),
+    }),
+    booking({
       id: "booking-1005",
       clientId: "client-2",
       barberId: "barber-2",
       serviceId: "service-beard",
-      startsAt: normalizeDateInput("2026-05-10", "16:00"),
-      endsAt: normalizeDateInput("2026-05-10", "16:30"),
+      startsAt: prevWeekday(3, "16:00"),
       status: "completed",
       source: "online",
       notes: "",
-      createdAt: normalizeDateInput("2026-05-01", "18:00"),
-    },
+      createdAt: daysAgo(12, "18:00"),
+    }),
   ],
   notifications: [
     {
       id: "notice-1",
       type: "booking",
       title: "Nowa rezerwacja online",
-      message: "Adam Nowak zarezerwował Skin fade u Oskara.",
-      createdAt: normalizeDateInput("2026-05-15", "11:20"),
+      message: "Norbert Szyszka zarezerwował Skin fade u Bartosza Sochackiego.",
+      createdAt: daysAgo(2, "11:20"),
       read: false,
     },
     {
@@ -221,7 +275,7 @@ export const initialData = {
       type: "system",
       title: "Brak płatności w MVP",
       message: "Moduł płatności jest celowo wyłączony w lokalnej wersji aplikacji.",
-      createdAt: normalizeDateInput("2026-05-17", "09:00"),
+      createdAt: daysAgo(3, "09:00"),
       read: false,
     },
     {
@@ -229,7 +283,7 @@ export const initialData = {
       type: "risk",
       title: "Kontrola double-bookingu",
       message: "System blokuje nakładające się wizyty tego samego fryzjera.",
-      createdAt: normalizeDateInput("2026-05-17", "09:10"),
+      createdAt: daysAgo(3, "09:10"),
       read: true,
     },
   ],
