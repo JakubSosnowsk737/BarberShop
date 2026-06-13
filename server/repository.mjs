@@ -963,9 +963,23 @@ export async function getBookingById(pool, bookingId) {
   return result.rows[0] ? mapBooking(result.rows[0]) : null;
 }
 
+// Stany końcowe wg modelu dynamicznego (Część II, §8.1): „zrealizowana” i
+// „anulowana” są nieodwracalne — z nich nie ma już żadnego przejścia.
+const TERMINAL_BOOKING_STATUSES = new Set(["completed", "cancelled"]);
+
 export async function updateBookingStatusRecord(pool, bookingId, status) {
   if (!ALLOWED_BOOKING_STATUSES.has(status)) {
     throw badRequest("Nieprawidłowy status wizyty.");
+  }
+
+  const current = await pool.query("select status from bookings where id = $1", [bookingId]);
+  if (!current.rows[0]) {
+    throw notFound("Nie znaleziono wizyty.");
+  }
+
+  const from = current.rows[0].status;
+  if (TERMINAL_BOOKING_STATUSES.has(from) && status !== from) {
+    throw badRequest("Wizyta jest już zakończona — jej statusu nie można zmienić.");
   }
 
   const result = await pool.query(
@@ -977,10 +991,6 @@ export async function updateBookingStatusRecord(pool, bookingId, status) {
     `,
     [bookingId, status],
   );
-
-  if (!result.rows[0]) {
-    throw notFound("Nie znaleziono wizyty.");
-  }
 
   return mapBooking(result.rows[0]);
 }

@@ -9,7 +9,7 @@ import {
   serializeSessionCookie,
   validateRegistrationInput,
   verifyPassword,
-} from "../server/auth.mjs";
+} from "../../server/auth.mjs";
 
 test("validates public registration input for a client account", () => {
   assert.deepEqual(

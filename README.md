@@ -91,8 +91,17 @@ Klient może anulować wyłącznie własną przyszłą wizytę. Fryzjer zarządz
 │   ├── core.js            # czysta logika domenowa (sloty, obłożenie, kalendarz)
 │   ├── data.js            # dane startowe (seed)
 │   └── styles.css         # style
-├── tests/                 # testy node:test (core + auth)
-├── docs/                  # dokumentacja koncepcyjna (PDF/DOCX/MD + diagramy)
+├── tests/
+│   ├── unit/              # testy jednostkowe (core, auth)
+│   ├── module/            # testy modułowe (harmonogram, rezerwacje, sesja)
+│   └── functional/        # testy funkcjonalne E2E (HTTP + PostgreSQL) + _harness.mjs
+├── docs/                       # dokumentacja koncepcyjna, testowa i wdrożeniowa
+│   ├── Plan-testow.md          # plan testów (etap 6)
+│   ├── Raport-testow.md        # raport z wynikami testów (etap 6)
+│   ├── Wdrozenie.md            # przewodnik wdrożenia (etap 7)
+│   ├── Dokumentacja-koncowa.md # dokument zamykający projekt (etap 7)
+│   └── *.pptx                  # prezentacje (testy i system) + skrypty
+├── .env.example
 ├── index.html
 ├── Dockerfile
 └── docker-compose.yml
@@ -209,13 +218,35 @@ Wszystkie odpowiedzi są w formacie JSON. Uwierzytelnianie przez ciasteczko sesj
 
 ## Testy
 
-Testy logiki domenowej i auth nie wymagają bazy:
+Trójpoziomowy zestaw testów (`node:test`). Plan i raport: [`docs/Plan-testow.md`](docs/Plan-testow.md), [`docs/Raport-testow.md`](docs/Raport-testow.md).
+
+**Jednostkowe + modułowe** (czysta logika, bez bazy):
 
 ```powershell
-node --test tests/*.test.mjs
+npm test
 ```
 
-(lub `npm test`)
+**Funkcjonalne (E2E)** — wymagają PostgreSQL. Najprościej wraz z bazą w Dockerze:
+
+```powershell
+npm run test:functional:db
+```
+
+**Pokrycie kodu** (jednostkowe + modułowe):
+
+```powershell
+npm run test:coverage
+```
+
+| Polecenie | Zakres |
+|-----------|--------|
+| `npm test` | jednostkowe + modułowe |
+| `npm run test:unit` / `test:module` / `test:functional` | pojedynczy poziom |
+| `npm run test:all` | wszystkie poziomy |
+| `npm run test:coverage` | jednostkowe + modułowe z pokryciem |
+
+Testy funkcjonalne pomijają się automatycznie (SKIP), gdy baza jest niedostępna.
+Pełny przebieg uruchamia też CI (GitHub Actions, [`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
 
 ## Reset bazy danych
 

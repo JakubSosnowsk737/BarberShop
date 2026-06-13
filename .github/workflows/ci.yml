@@ -1,0 +1,56 @@
+name: Testy systemu
+
+# Automatyzacja procesu testowania (pkt 6 projektu):
+# - testy jednostkowe i modułowe biegną na każdym pushu i pull requeście (bez bazy),
+# - testy funkcjonalne (E2E) biegną na usługowym kontenerze PostgreSQL.
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  unit-module:
+    name: Jednostkowe + modułowe (pokrycie)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm ci
+      - name: Testy jednostkowe i modułowe z pomiarem pokrycia
+        run: node --test --experimental-test-coverage "tests/unit/*.test.mjs" "tests/module/*.test.mjs"
+
+  functional:
+    name: Funkcjonalne (E2E) na PostgreSQL
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: hairbook_test
+          POSTGRES_USER: hairbook
+          POSTGRES_PASSWORD: hairbook
+          TZ: Europe/Warsaw
+          PGTZ: Europe/Warsaw
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U hairbook -d hairbook_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgres://hairbook:hairbook@localhost:5432/hairbook_test
+      SALON_TZ: Europe/Warsaw
+      TZ: Europe/Warsaw
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm ci
+      - name: Testy funkcjonalne (E2E)
+        run: npm run test:functional

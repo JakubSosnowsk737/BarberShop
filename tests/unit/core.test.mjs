@@ -16,7 +16,7 @@ import {
   searchClients,
   staffAvailableMinutes,
   utilizationForDate,
-} from "../src/core.js";
+} from "../../src/core.js";
 
 const services = [
   { id: "cut", name: "Strzyzenie meskie", duration: 45, price: 80, active: true },

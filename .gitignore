@@ -5,17 +5,20 @@ node_modules/
 *.log
 npm-debug.log*
 
-# Claude Code local state
-.claude/
-
 # Python build artifacts (docs/)
 __pycache__/
 *.pyc
+
+# Lokalna konfiguracja środowiska (sekrety) — szablon: .env.example
+.env
 
 # OS files
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Pliki tymczasowe MS Office (blokady otwartych dokumentów)
+~$*
 
 # Editor
 .vscode/

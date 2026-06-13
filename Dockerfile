@@ -3,7 +3,8 @@ FROM node:20-alpine
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
-RUN npm install --omit=dev
+# Reprodukowalna instalacja z pliku lock (produkcyjnie, bez devDependencies).
+RUN npm ci --omit=dev
 
 COPY . .
 

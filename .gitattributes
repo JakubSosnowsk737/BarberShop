@@ -1,0 +1,13 @@
+# Normalizacja końców linii dla plików tekstowych (repo: LF)
+* text=auto eol=lf
+
+# Pliki binarne — bez normalizacji i bez diffów tekstowych
+*.pdf  binary
+*.docx binary
+*.pptx binary
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.ico  binary
+*.woff binary
+*.woff2 binary

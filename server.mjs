@@ -1,6 +1,6 @@
 import { createReadStream, existsSync, statSync } from "node:fs";
 import { createServer } from "node:http";
-import { extname, join, normalize } from "node:path";
+import { extname, join, normalize, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import {
@@ -47,7 +47,7 @@ import {
 const root = fileURLToPath(new URL(".", import.meta.url));
 const preferredPort = Number(process.env.PORT || 5173);
 const host = process.env.HOST || "0.0.0.0";
-const pool = createPool();
+export const pool = createPool();
 
 const types = {
   ".css": "text/css; charset=utf-8",
@@ -568,7 +568,24 @@ function serveStatic(request, response) {
   createReadStream(filePath).pipe(response);
 }
 
-async function start() {
+// Pojedynczy punkt wejścia obsługi żądań — wyeksportowany, aby testy funkcjonalne
+// mogły uruchomić ten sam handler na efemerycznym porcie bez powielania routingu.
+export async function requestListener(request, response) {
+  try {
+    const url = new URL(request.url, "http://localhost");
+
+    if (url.pathname.startsWith("/api/")) {
+      await handleApi(request, response, url);
+      return;
+    }
+
+    serveStatic(request, response);
+  } catch (error) {
+    sendError(response, error);
+  }
+}
+
+export async function start() {
   await waitForDatabase(pool);
   await migrateDatabase(pool);
   await seedDatabase(pool);
@@ -581,27 +598,23 @@ async function start() {
   }, 60 * 60 * 1000);
   sessionSweep.unref?.();
 
-  const server = createServer(async (request, response) => {
-    try {
-      const url = new URL(request.url, "http://localhost");
-
-      if (url.pathname.startsWith("/api/")) {
-        await handleApi(request, response, url);
-        return;
-      }
-
-      serveStatic(request, response);
-    } catch (error) {
-      sendError(response, error);
-    }
-  });
+  const server = createServer(requestListener);
 
   server.listen(preferredPort, host, () => {
     console.log(`HairBook Local is running at http://127.0.0.1:${preferredPort}`);
   });
+
+  return server;
 }
 
-start().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+// Auto-start wyłącznie przy uruchomieniu jako główny moduł (node server.mjs).
+// Import w testach nie wywołuje połączenia z bazą ani nasłuchu.
+const isMainModule =
+  process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (isMainModule) {
+  start().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}
